@@ -50,7 +50,13 @@ class Memory(nn.Module):
     def conv_shift(self, wg, s):
         padding_size = len(s) // 2
         padded_wg = torch.cat([wg[:, -padding_size:], wg, wg[:, :padding_size]], dim=1)
-        return F.conv1d(padded_wg, s)  # todo: fixme
+
+        result = torch.zeros(wg.size())
+
+        for b in range(self.batch_size):
+            result[b] = F.conv1d(padded_wg[b].view(1, 1, -1), s[b].view(1, 1, -1)).view(-1)
+
+        return result
 
     def sharpen(self, wt, y):
         wt = wt ** y
