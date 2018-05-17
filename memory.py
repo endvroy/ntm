@@ -1,7 +1,6 @@
 import torch
 from torch import nn
 import torch.nn.functional as F
-from torch.autograd import Variable
 import numpy as np
 
 
@@ -13,8 +12,7 @@ class Memory(nn.Module):
 
         self.N = N
         self.M = M
-
-        self.register_buffer('mem_bias', Variable(torch.Tensor(N, M)))
+        self.mem_bias = torch.Tensor(N, M)
 
         # Initialize memory bias
         stdev = 1 / (np.sqrt(N + M))

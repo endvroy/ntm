@@ -17,6 +17,15 @@ class Controller(nn.Module):
 
         self.reset()
 
+        self.lstm_h_bias = Parameter(torch.randn(self.num_layers, 1, self.num_outputs) * 0.05)
+        self.lstm_c_bias = Parameter(torch.randn(self.num_layers, 1, self.num_outputs) * 0.05)
+
+    def new_init_state(self, batch_size):
+        # Dimension: (num_layers * num_directions, batch, hidden_size)
+        lstm_h = self.lstm_h_bias.clone().repeat(1, batch_size, 1)
+        lstm_c = self.lstm_c_bias.clone().repeat(1, batch_size, 1)
+        return lstm_h, lstm_c
+
     def reset(self):
         for p in self.lstm.parameters():
             if p.dim() == 1:

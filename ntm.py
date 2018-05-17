@@ -23,7 +23,21 @@ class NTM(nn.Module):
         nn.init.xavier_uniform(self.fc.weight, gain=1)
         nn.init.normal(self.fc.bias, std=0.01)
 
-    def forward(self, inp, prev_reads, prev_controller_state, prev_read_weights, prev_write_weights):
+    def init_state(self, batch_size):
+        N, M = self.memory.size()
+        init_prev_reads = [(torch.randn(1, M) * 0.01).repeat(batch_size, 1)
+                           for i in range(len(self.read_heads))]
+        init_controller_state = self.controller.new_init_state()
+        prev_read_weights = torch.zeros(batch_size, N)
+        prev_write_weights = torch.zeros(batch_size, N)
+        return init_prev_reads, init_controller_state, prev_read_weights, prev_write_weights
+
+    def forward(self,
+                inp,
+                prev_reads,
+                prev_controller_state,
+                prev_read_weights,
+                prev_write_weights):
         controller_outs, controller_state = self.controller(torch.cat([inp] + prev_reads, dim=1),
                                                             prev_controller_state)
 
@@ -32,7 +46,7 @@ class NTM(nn.Module):
         for prev_weight, head in zip(prev_read_weights, self.read_heads):
             params = head(controller_outs)
             weight = self.memory.address(prev_weight, *params)
-            read_vec.append(weight)
+            read_weights.append(weight)
             read_vec = self.memory.read(weight)
             reads.append(read_vec)
 

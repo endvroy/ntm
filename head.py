@@ -25,8 +25,8 @@ class ReadHead(nn.Module):
 
     def reset(self):
         # Initialize the linear layers
-        nn.init.xavier_uniform(self.fc.weight, gain=1.4)
-        nn.init.normal(self.fc.bias, std=0.01)
+        nn.init.xavier_uniform_(self.fc.weight, gain=1.4)
+        nn.init.normal_(self.fc.bias, std=0.01)
 
     def forward(self, controller_output):
         params = self.fc(controller_output)
@@ -50,8 +50,8 @@ class WriteHead(nn.Module):
 
     def reset(self):
         # Initialize the linear layers
-        nn.init.xavier_uniform(self.fc.weight, gain=1.4)
-        nn.init.normal(self.fc.bias, std=0.01)
+        nn.init.xavier_uniform_(self.fc.weight, gain=1.4)
+        nn.init.normal_(self.fc.bias, std=0.01)
 
     def forward(self, controller_output):
         params = self.fc(controller_output)
