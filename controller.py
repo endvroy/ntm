@@ -17,8 +17,8 @@ class Controller(nn.Module):
 
         self.reset()
 
-        self.lstm_h_bias = Parameter(torch.randn(self.num_layers, 1, self.num_outputs) * 0.05)
-        self.lstm_c_bias = Parameter(torch.randn(self.num_layers, 1, self.num_outputs) * 0.05)
+        self.lstm_h_bias = Parameter(torch.randn(self.num_layers, 1, self.output_size) * 0.05)
+        self.lstm_c_bias = Parameter(torch.randn(self.num_layers, 1, self.output_size) * 0.05)
 
     def new_init_state(self, batch_size):
         # Dimension: (num_layers * num_directions, batch, hidden_size)
@@ -29,10 +29,10 @@ class Controller(nn.Module):
     def reset(self):
         for p in self.lstm.parameters():
             if p.dim() == 1:
-                nn.init.constant(p, 0)
+                nn.init.constant_(p, 0)
             else:
-                stdev = 5 / (np.sqrt(self.num_inputs + self.num_outputs))
-                nn.init.uniform(p, -stdev, stdev)
+                stdev = 5 / (np.sqrt(self.input_size + self.output_size))
+                nn.init.uniform_(p, -stdev, stdev)
 
     def forward(self, x, prev_state):
         out, state = self.lstm(x.unsqueeze(0), prev_state)

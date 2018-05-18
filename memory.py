@@ -16,7 +16,7 @@ class Memory(nn.Module):
 
         # Initialize memory bias
         stdev = 1 / (np.sqrt(N + M))
-        nn.init.uniform(self.mem_bias, -stdev, stdev)
+        nn.init.uniform_(self.mem_bias, -stdev, stdev)
 
     def reset(self, batch_size):
         self.batch_size = batch_size

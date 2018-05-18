@@ -1,10 +1,10 @@
 import torch
 from torch import nn
 
-from .ntm import NTM
-from .controller import Controller
-from .head import ReadHead, WriteHead
-from .memory import Memory
+from ntm import NTM
+from controller import Controller
+from head import ReadHead, WriteHead
+from memory import Memory
 
 
 def ntm_factory(input_size, output_size,
@@ -23,7 +23,17 @@ def ntm_factory(input_size, output_size,
     for i in range(n_write_heads):
         write_heads.append(WriteHead(M, controller_out_size))
 
-    controller = Controller(input_size, controller_out_size, controller_layers)
+    controller = Controller(input_size + M * n_read_heads, controller_out_size, controller_layers)
 
     ntm = NTM(input_size, output_size, controller, memory, read_heads, write_heads)
     return ntm
+
+
+if __name__ == '__main__':
+    ntm = ntm_factory(4, 6,
+                      5, 2,
+                      2, 1,
+                      3, 7)
+    init_states = ntm.init_state(2)
+    inp = torch.Tensor([1, 0, 0, 1]).repeat(2, 1)
+    out, *states = ntm(inp, *init_states)
