@@ -29,8 +29,8 @@ class Memory(nn.Module):
         return (w.unsqueeze(2) * self.memory).sum(1)
 
     def write(self, w, e, a):
-        self.memory *= (1 - w.unsqueeze(-1) @ e.unsqueeze(1))
-        self.memory += w.unsqueeze(-1) @ a.unsqueeze(1)
+        self.memory = self.memory * (1 - w.unsqueeze(-1) @ e.unsqueeze(1))
+        self.memory = self.memory + w.unsqueeze(-1) @ a.unsqueeze(1)
 
     def address(self, prev_w, k, beta, g, s, y):
         wc = self.content_address(k, beta)

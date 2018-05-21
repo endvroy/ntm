@@ -37,3 +37,6 @@ if __name__ == '__main__':
     init_states = ntm.init_state(2)
     inp = torch.Tensor([1, 0, 0, 1]).repeat(2, 1)
     out, *states = ntm(inp, *init_states)
+    criterion = nn.BCELoss()
+    cost = criterion(out, torch.randn(2, 6))
+
