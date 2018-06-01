@@ -24,6 +24,7 @@ class NTM(nn.Module):
         nn.init.normal_(self.output_fc.bias, std=0.01)
 
     def init_state(self, batch_size):
+        self.batch_size = batch_size
         self.memory.reset(batch_size)
         N, M = self.memory.size()
         init_prev_reads = [(torch.randn(1, M) * 0.01).repeat(batch_size, 1)
@@ -31,14 +32,13 @@ class NTM(nn.Module):
         init_controller_state = self.controller.new_init_state(batch_size)
         prev_read_weights = torch.zeros(batch_size, N)
         prev_write_weights = torch.zeros(batch_size, N)
-        return init_prev_reads, init_controller_state, prev_read_weights, prev_write_weights
+        self.state = init_prev_reads, init_controller_state, prev_read_weights, prev_write_weights
 
-    def forward(self,
-                inp,
-                prev_reads,
-                prev_controller_state,
-                prev_read_weights,
-                prev_write_weights):
+    def forward(self, inp=None):
+        if inp is None:
+            inp = torch.zeros(self.batch_size, self.input_size)
+
+        prev_reads, prev_controller_state, prev_read_weights, prev_write_weights = self.state
         controller_outs, controller_state = self.controller(torch.cat([inp] + prev_reads, dim=1),
                                                             prev_controller_state)
 
@@ -61,4 +61,5 @@ class NTM(nn.Module):
 
         out = F.sigmoid(self.output_fc(torch.cat([controller_outs] + reads, dim=1)))
 
-        return out, reads, controller_state, read_weights, write_weights
+        self.state = reads, controller_state, read_weights, write_weights
+        return out
