@@ -34,9 +34,10 @@ if __name__ == '__main__':
                       5, 2,
                       2, 1,
                       3, 7)
-    init_states = ntm.init_state(2)
+    ntm.init_state(2)
     inp = torch.Tensor([1, 0, 0, 1]).repeat(2, 1)
-    out, *states = ntm(inp, *init_states)
+    out = ntm(inp)
+    y_out = ntm()
     criterion = nn.BCELoss()
-    cost = criterion(out, torch.randn(2, 6))
-
+    loss = criterion(y_out, torch.randn(2, 6))
+    loss.backward()
