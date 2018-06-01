@@ -46,7 +46,7 @@ class Memory(nn.Module):
         return g * wc + (1 - g) * prev_w
 
     def conv_shift(self, wg, s):
-        padding_size = len(s) // 2
+        padding_size = s.size()[1] // 2
         padded_wg = torch.cat([wg[:, -padding_size:], wg, wg[:, :padding_size]], dim=1)
 
         result = torch.zeros(wg.size())
