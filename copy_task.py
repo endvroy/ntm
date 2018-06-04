@@ -41,19 +41,21 @@ def gen_data(n_batches,
 
 
 import torch.optim as optim
-from torch.nn import BCELoss
+from torch import nn
+import math
 
 
 def clip_grads(net):
     """Gradient clipping to the range [10, 10]."""
-    # parameters = list(filter(lambda p: p.grad is not None, net.parameters()))
-    params = [x for x in net.parameters() if x.grad is not None]
+    params = list(filter(lambda p: p.grad is not None, net.parameters()))
+    # params = [x for x in net.parameters() if x.grad is not None]
     for p in params:
         p.grad.data.clamp_(-10, 10)
 
 
-def train_batch(ntm, inp, correct_out, optimizer, criterion):
+def train_batch(ntm, batch_size, inp, correct_out, optimizer, criterion):
     optimizer.zero_grad()
+    ntm.init_state(batch_size)
 
     inp_seq_len = inp.size(0)
     out_seq_len, batch_size, _ = correct_out.size()
@@ -77,15 +79,33 @@ def train():
                       100, 1,
                       1, 1,
                       128, 20)
-    ntm.init_state(batch_size)
 
-    optimizer = optim.RMSprop(ntm.parameters(), momentum=0.9)
-    criterion = BCELoss()
+    optimizer = optim.RMSprop(ntm.parameters(), lr=0.0001, alpha=0.95, momentum=0.9)
+    criterion = nn.BCELoss()
 
     for i, inp, correct_out in gen_data(50000, batch_size, input_size, 1, 20):
-        train_batch(ntm, inp, correct_out, optimizer, criterion)
+        train_batch(ntm, batch_size, inp, correct_out, optimizer, criterion)
 
     return ntm
+
+
+def calculate_num_params(net):
+    """Returns the total number of parameters."""
+    num_params = 0
+    for p in net.parameters():
+        num_params += p.data.view(-1).size(0)
+    return num_params
+
+
+def debug():
+    input_size = 8
+    batch_size = 1
+    ntm = ntm_factory(input_size + 1, input_size,
+                      100, 1,
+                      1, 1,
+                      128, 20)
+    ntm.init_state(batch_size)
+    print(calculate_num_params(ntm))
 
 
 if __name__ == '__main__':

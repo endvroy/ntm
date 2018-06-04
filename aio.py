@@ -41,3 +41,9 @@ if __name__ == '__main__':
     criterion = nn.BCELoss()
     loss = criterion(y_out, torch.randn(2, 6))
     loss.backward()
+
+    inp = torch.Tensor([0, 1, 0, 1]).repeat(2, 1)
+    out = ntm(inp)
+    y_out = ntm()
+    loss = criterion(y_out, torch.randn(2, 6))
+    loss.backward()

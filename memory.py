@@ -12,7 +12,8 @@ class Memory(nn.Module):
 
         self.N = N
         self.M = M
-        self.mem_bias = torch.Tensor(N, M)
+        # self.mem_bias = torch.Tensor(N, M)
+        self.register_buffer('mem_bias', torch.Tensor(N, M))
 
         # Initialize memory bias
         stdev = 1 / (np.sqrt(N + M))
@@ -39,7 +40,7 @@ class Memory(nn.Module):
         return self.sharpen(wt, y)
 
     def content_address(self, k, beta):
-        t = F.cosine_similarity(k.unsqueeze(1), self.memory, dim=-1)
+        t = F.cosine_similarity(k.unsqueeze(1) + 1e-16, self.memory + 1e-16, dim=-1)
         return F.softmax(beta * t, dim=1)
 
     def interpolation(self, prev_w, wc, g):
@@ -58,5 +59,5 @@ class Memory(nn.Module):
 
     def sharpen(self, wt, y):
         wt = wt ** y
-        s = wt.sum(dim=1).unsqueeze(-1)
+        s = wt.sum(dim=1).unsqueeze(-1) + 1e-16
         return wt / s
