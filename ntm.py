@@ -18,6 +18,8 @@ class NTM(nn.Module):
         self.output_fc = nn.Linear(controller.output_size + M * len(self.read_heads), output_size)
         self.reset_params()
 
+        self.init_reads = [(torch.randn(1, M) * 0.01) for i in range(len(self.read_heads))]
+
     def reset_params(self):
         # Initialize the linear layer
         nn.init.xavier_uniform_(self.output_fc.weight, gain=1)
@@ -27,8 +29,7 @@ class NTM(nn.Module):
         self.batch_size = batch_size
         self.memory.reset(batch_size)
         N, M = self.memory.size()
-        init_prev_reads = [(torch.randn(1, M) * 0.01).repeat(batch_size, 1)
-                           for i in range(len(self.read_heads))]
+        init_prev_reads = [r.repeat(batch_size, 1) for r in self.init_reads]
         init_controller_state = self.controller.new_init_state(batch_size)
         prev_read_weights = torch.zeros(batch_size, N)
         prev_write_weights = torch.zeros(batch_size, N)
