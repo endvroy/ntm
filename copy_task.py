@@ -89,6 +89,26 @@ def train():
     return ntm
 
 
+def evaluate(ntm, input_size, seq_len):
+    ntm.init_state(1)
+    seq = np.random.binomial(1, 0.5, (seq_len, 1, input_size))
+    seq = torch.from_numpy(seq)
+
+    # The input includes an additional channel used for the delimiter
+    inp = torch.zeros(seq_len + 1, 1, input_size + 1)
+    inp[:seq_len, :, :input_size] = seq
+    inp[seq_len, :, input_size] = 1.0  # delimiter in our control channel
+    correct_out = seq.clone()
+
+    out_seq_len, batch_size, _ = correct_out.size()
+    y_out = torch.zeros(correct_out.size())
+    with torch.no_grad():
+        for j in range(out_seq_len):
+            y_out[j] = ntm()
+
+    return inp, correct_out, y_out
+
+
 def calculate_num_params(net):
     """Returns the total number of parameters."""
     num_params = 0
@@ -105,8 +125,26 @@ def debug():
                       1, 1,
                       128, 20)
     ntm.init_state(batch_size)
-    print(calculate_num_params(ntm))
+    # print(calculate_num_params(ntm))
+    return ntm
+
+
+import matplotlib.pyplot as plt
+
+
+def plot(inp, correct_out, y_out):
+    plt.figure(1)
+    ax1 = plt.subplot(311)
+    plt.imshow(torch.t(inp.squeeze(1)))
+    ax2 = plt.subplot(312)
+    plt.imshow(torch.t(correct_out.squeeze(1)))
+    ax3 = plt.subplot(313)
+    plt.imshow(torch.t(y_out.squeeze(1)))
+    # plt.colorbar(ax=[ax1, ax2, ax3], orientation='horizontal')
+    plt.show()
 
 
 if __name__ == '__main__':
-    train()
+    ntm = debug()
+    inp, correct_out, y_out = evaluate(ntm, 8, 20)
+    plot(inp, correct_out, y_out)
