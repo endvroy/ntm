@@ -1,10 +1,10 @@
 import torch
 from torch import nn
 
-from ntm import NTM
-from controller import Controller
-from head import ReadHead, WriteHead
-from memory import Memory
+from .ntm import NTM
+from .controller import Controller
+from .head import ReadHead, WriteHead
+from .memory import Memory
 
 
 def ntm_factory(input_size, output_size,

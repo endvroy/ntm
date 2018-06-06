@@ -3,7 +3,7 @@ import torch
 import numpy as np
 import torch.optim as optim
 from torch import nn
-from factory import ntm_factory
+from ntm.factory import ntm_factory
 from trainer import train
 from utils import plot
 
