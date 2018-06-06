@@ -9,11 +9,12 @@ from utils import plot
 
 
 class Model:
-    def __init__(self, ntm, data_loader, optimizer, criterion):
+    def __init__(self, ntm, data_loader, optimizer, criterion, task_name):
         self.ntm = ntm
         self.data_loader = data_loader
         self.optimizer = optimizer
         self.criterion = criterion
+        self.task_name = task_name
 
 
 class DataLoader:
@@ -82,7 +83,8 @@ if __name__ == '__main__':
     model = Model(ntm,
                   data_loader,
                   optim.RMSprop(ntm.parameters(), lr=0.0001, alpha=0.95, momentum=0.9),
-                  nn.BCELoss())
+                  nn.BCELoss(),
+                  'copy_task')
     ntm = train(model)
     inp, correct_out, y_out = final_eval(ntm, 8, 80)
     plot(inp, correct_out, y_out)

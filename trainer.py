@@ -48,5 +48,5 @@ def train(model):
         loss = train_batch(ntm, data_loader.batch_size, inp, correct_out, optimizer, criterion)
         if (i + 1) % 1000 == 0:
             print(f'{i + 1} batches finished, loss={loss}')
-            save_checkpoint(ntm, 'copy_task', now, i + 1)
+            save_checkpoint(ntm, model.task_name, now, i + 1)
     return ntm
