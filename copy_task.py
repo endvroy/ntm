@@ -1,6 +1,6 @@
 import random
 import torch
-from aio import ntm_factory
+from factory import ntm_factory
 import numpy as np
 
 
