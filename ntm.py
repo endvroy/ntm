@@ -16,11 +16,11 @@ class NTM(nn.Module):
         _, M = memory.size()
 
         self.output_fc = nn.Linear(controller.output_size + M * len(self.read_heads), output_size)
-        self.reset_params()
+        self.init_params()
 
         self.init_reads = [(torch.randn(1, M) * 0.01) for i in range(len(self.read_heads))]
 
-    def reset_params(self):
+    def init_params(self):
         # Initialize the linear layer
         nn.init.xavier_uniform_(self.output_fc.weight, gain=1)
         nn.init.normal_(self.output_fc.bias, std=0.01)
