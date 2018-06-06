@@ -141,13 +141,20 @@ import matplotlib.pyplot as plt
 
 def plot(inp, correct_out, y_out):
     plt.figure(1)
-    ax1 = plt.subplot(311)
-    plt.imshow(torch.t(inp.squeeze(1)))
-    ax2 = plt.subplot(312)
-    plt.imshow(torch.t(correct_out.squeeze(1)))
-    ax3 = plt.subplot(313)
-    plt.imshow(torch.t(y_out.squeeze(1)))
-    # plt.colorbar(ax=[ax1, ax2, ax3], orientation='horizontal')
+    ax1 = plt.subplot(411)
+    plt.title('input')
+    plt.imshow(torch.t(inp.squeeze(1)), vmin=0, vmax=1, cmap='Blues')
+    ax2 = plt.subplot(412)
+    plt.title('correct output')
+    plt.imshow(torch.t(correct_out.squeeze(1)), vmin=0, vmax=1, cmap='Blues')
+    ax3 = plt.subplot(413)
+    plt.title('actual output')
+    plt.imshow(torch.t(y_out.squeeze(1)), vmin=0, vmax=1, cmap='Blues')
+    error = torch.abs(correct_out.float() - y_out)
+    ax4 = plt.subplot(414)
+    plt.title('error')
+    plt.imshow(torch.t(error.squeeze(1)), vmin=0, vmax=1, cmap='Reds')
+    # plt.colorbar()
     plt.show()
 
 
@@ -160,4 +167,4 @@ def binarize(tensor):
 if __name__ == '__main__':
     ntm = train()
     # inp, correct_out, y_out = final_eval(ntm, 8, 20)
-    # plot(inp, correct_out, y_out)
+    plot(inp, correct_out, y_out)
