@@ -70,6 +70,7 @@ def train_batch(ntm, batch_size, inp, correct_out, optimizer, criterion):
     loss.backward()
     clip_grads(ntm)
     optimizer.step()
+    return loss.data.item()
 
 
 def train():
@@ -84,12 +85,14 @@ def train():
     criterion = nn.BCELoss()
 
     for i, inp, correct_out in gen_data(50000, batch_size, input_size, 1, 20):
-        train_batch(ntm, batch_size, inp, correct_out, optimizer, criterion)
-
+        loss = train_batch(ntm, batch_size, inp, correct_out, optimizer, criterion)
+        if i % 1000 == 0:
+            print(f'{i} batches finished, loss={loss}')
+            torch.save(ntm.state_dict(), f'checkpoints/{i}.sd')
     return ntm
 
 
-def evaluate(ntm, input_size, seq_len):
+def final_eval(ntm, input_size, seq_len):
     ntm.init_state(1)
     seq = np.random.binomial(1, 0.5, (seq_len, 1, input_size))
     seq = torch.from_numpy(seq)
@@ -98,11 +101,15 @@ def evaluate(ntm, input_size, seq_len):
     inp = torch.zeros(seq_len + 1, 1, input_size + 1)
     inp[:seq_len, :, :input_size] = seq
     inp[seq_len, :, input_size] = 1.0  # delimiter in our control channel
+    inp_seq_len = inp.size(0)
     correct_out = seq.clone()
 
     out_seq_len, batch_size, _ = correct_out.size()
     y_out = torch.zeros(correct_out.size())
     with torch.no_grad():
+        for j in range(inp_seq_len):
+            out = ntm(inp[j])
+
         for j in range(out_seq_len):
             y_out[j] = ntm()
 
@@ -144,7 +151,13 @@ def plot(inp, correct_out, y_out):
     plt.show()
 
 
+def binarize(tensor):
+    binarized = tensor.clone().data
+    binarized.apply_(lambda x: 0 if x < 0.5 else 1)
+    return binarized
+
+
 if __name__ == '__main__':
-    ntm = debug()
-    inp, correct_out, y_out = evaluate(ntm, 8, 20)
-    plot(inp, correct_out, y_out)
+    ntm = train()
+    # inp, correct_out, y_out = final_eval(ntm, 8, 20)
+    # plot(inp, correct_out, y_out)
