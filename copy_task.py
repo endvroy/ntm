@@ -42,7 +42,6 @@ def gen_data(n_batches,
 
 import torch.optim as optim
 from torch import nn
-import math
 
 
 def clip_grads(net):
@@ -73,7 +72,20 @@ def train_batch(ntm, batch_size, inp, correct_out, optimizer, criterion):
     return loss.data.item()
 
 
+import pathlib
+
+
+def save_checkpoint(ntm, task_name, timestamp, i):
+    pathlib.Path(f'checkpoints/{task_name}/{timestamp}/').mkdir(parents=True, exist_ok=True)
+    torch.save(ntm.state_dict(), f'checkpoints/{task_name}/{timestamp}/{i}.sd')
+
+
+import datetime
+
+
 def train():
+    now = datetime.datetime.now().isoformat()
+
     input_size = 8
     batch_size = 1
     ntm = ntm_factory(input_size + 1, input_size,
@@ -88,7 +100,7 @@ def train():
         loss = train_batch(ntm, batch_size, inp, correct_out, optimizer, criterion)
         if i % 1000 == 0:
             print(f'{i} batches finished, loss={loss}')
-            torch.save(ntm.state_dict(), f'checkpoints/{i}.sd')
+            save_checkpoint(ntm, 'copy_task', now, i)
     return ntm
 
 
@@ -167,4 +179,4 @@ def binarize(tensor):
 if __name__ == '__main__':
     ntm = train()
     # inp, correct_out, y_out = final_eval(ntm, 8, 20)
-    plot(inp, correct_out, y_out)
+    # plot(inp, correct_out, y_out)
